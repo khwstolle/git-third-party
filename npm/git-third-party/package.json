@@ -1,0 +1,55 @@
+{
+  "name": "git-third-party",
+  "version": "1.0.0",
+  "description": "Vendor third-party Git repositories into your own, with path filtering and local patches. CLI plus in-process Node bindings.",
+  "keywords": ["git", "vendoring", "third-party", "subtree", "submodule"],
+  "license": "MIT",
+  "homepage": "https://github.com/khwstolle/git-third-party",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/khwstolle/git-third-party"
+  },
+  "author": "khwstolle",
+  "engines": {
+    "node": ">=18"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "git-third-party": "bin/git-third-party.cjs"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "node --test --test-reporter=spec test/bindings.test.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "koffi": "^2.10.0"
+  },
+  "optionalDependencies": {
+    "git-third-party-linux-x64": "1.0.0",
+    "git-third-party-linux-arm64": "1.0.0",
+    "git-third-party-darwin-x64": "1.0.0",
+    "git-third-party-darwin-arm64": "1.0.0",
+    "git-third-party-win32-x64": "1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  }
+}

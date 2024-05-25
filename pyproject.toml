@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "git-third-party"
+version = "1.0.0"
+description = "Vendor third-party Git repositories into your own, with path filtering and local patches."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+authors = [{ name = "khwstolle" }]
+keywords = ["git", "vendoring", "third-party", "subtree", "submodule"]
+classifiers = [
+  "Programming Language :: Go",
+  "Topic :: Software Development :: Version Control :: Git",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
+  "License :: OSI Approved :: MIT License",
+]
+
+[project.urls]
+Homepage = "https://github.com/khwstolle/git-third-party"
+Repository = "https://github.com/khwstolle/git-third-party"
+
+[tool.hatch.build.targets.wheel]
+packages = ["python/third_party"]
+
+[tool.hatch.build.targets.wheel.hooks.custom]
+path = "hatch_build.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/cmd",
+  "/internal",
+  "/go.mod",
+  "/go.sum",
+  "/completion",
+  "/npm",
+  "/python",
+  "/README.md",
+  "/LICENSE",
+  "/pyproject.toml",
+  "/hatch_build.py",
+]

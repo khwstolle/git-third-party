@@ -1,0 +1,1031 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>git-third-party — Vendor Git Dependencies Without Submodules</title>
+  <meta name="description"
+    content="Vendor third-party dependencies as plain files with a declarative lockfile. A drop-in replacement for git submodules and git subtree. CLI, Python, and Node bindings.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="git-third-party — Vendor Git Dependencies Without Submodules">
+  <meta property="og:description" content="Vendor third-party dependencies as plain files with a declarative lockfile. A drop-in replacement for git submodules and git subtree.">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.36.0/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <header id="top" class="topbar">
+    <div class="topbar__left">
+      <a href="#top" class="brand-mark" aria-label="git-third-party home">
+        <span class="brand-mark__pop" aria-hidden="true">🎉</span>
+        <span class="brand-mark__word">git<span class="brand-mark__hy brand-mark__hy--red">-</span>third<span
+            class="brand-mark__hy brand-mark__hy--yel">-</span>party</span>
+      </a>
+    </div>
+    <div class="topbar__right">
+      <a href="#install" class="btn btn--ghost btn--sm">Install</a>
+      <a href="#commands" class="btn btn--ghost btn--sm">Reference</a>
+      <a href="https://github.com/khwstolle/git-third-party" class="btn btn--secondary btn--sm">
+        <i class="ti ti-brand-github"></i> GitHub
+      </a>
+    </div>
+  </header>
+
+  <header class="doc-hero">
+    <aside class="doc-hero__aside">
+
+      <div class="doc-hero__chips" role="list">
+        <span class="doc-hero__chip doc-hero__chip--red" role="listitem">Git extension</span>
+        <span class="doc-hero__chip doc-hero__chip--orange" role="listitem">Vendoring</span>
+        <span class="doc-hero__chip doc-hero__chip--yellow" role="listitem">CLI</span>
+        <span class="doc-hero__chip doc-hero__chip--pink" role="listitem">Python</span>
+        <span class="doc-hero__chip doc-hero__chip--blue" role="listitem">Node</span>
+      </div>
+      <dl class="doc-hero__meta">
+        <div>
+          <dt>Version</dt>
+          <dd><code>1.0</code></dd>
+        </div>
+        <div>
+          <dt>License</dt>
+          <dd><a href="https://github.com/khwstolle/git-third-party/blob/master/LICENSE">MIT</a></dd>
+        </div>
+        <div>
+          <dt>Source</dt>
+          <dd><a href="https://github.com/khwstolle/git-third-party">khwstolle/git-third-party</a></dd>
+        </div>
+        <div>
+          <dt>Distributions</dt>
+          <dd>
+            <a href="https://github.com/khwstolle/git-third-party/releases">GitHub</a>
+            ·
+            <a href="https://pypi.org/project/git-third-party/">PyPI</a>
+            ·
+            <a href="https://www.npmjs.com/package/git-third-party">npm</a>
+          </dd>
+        </div>
+      </dl>
+    </aside>
+
+    <div class="doc-hero__main">
+
+      <h1 class="doc-hero__name">git<span class="hy hy--1">-</span>third<span class="hy hy--2">-</span>party</h1>
+      <p class="doc-hero__tag">Vendor third-party Git content into your repository as ordinary files. No submodules, no
+        subtree, no out-of-tree state.</p>
+      <p class="doc-hero__lede">
+        Declare what you want in <code>third-party.toml</code> and run <code>git third-party update</code>. Upstream
+        code lands at the paths you choose as plain files — visible to CI, <code>grep</code>, and your IDE. Pin to a
+        tag, track a branch, filter to a subdirectory: one config file and one command handle the rest.
+      </p>
+      <nav class="doc-hero__actions">
+        <a href="#install" class="btn btn--primary"><i class="ti ti-download"></i> Install</a>
+        <a href="#quick-start" class="btn btn--secondary"><i class="ti ti-player-play"></i> Quick start</a>
+        <a href="#commands" class="btn btn--ghost"><i class="ti ti-terminal-2"></i> Command reference</a>
+        <a href="https://github.com/khwstolle/git-third-party" class="btn btn--ghost"><i
+            class="ti ti-external-link"></i> Source</a>
+      </nav>
+
+      <div class="doc-hero__snippet">
+        <div class="doc-code">
+          <div class="doc-code__bar">
+            <span class="doc-code__label"><i class="ti ti-terminal-2"></i>Add an entry</span>
+            <button class="doc-code__copy" type="button"><i class="ti ti-copy"></i><span
+                class="doc-code__copy-label">Copy</span></button>
+          </div>
+          <pre><code><span class="tk-com"># vendor zlib at master, recursively</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">add</span> <span class="tk-arg">third_party/zlib</span> <span class="tk-str">https://github.com/madler/zlib</span> <span class="tk-flag">--follow</span> <span class="tk-arg">master</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git</span> <span class="tk-arg">commit</span> <span class="tk-flag">-m</span> <span class="tk-str">"vendor zlib"</span>
+</code></pre>
+        </div>
+        <div class="doc-code">
+          <div class="doc-code__bar">
+            <span class="doc-code__label"><i class="ti ti-terminal-2"></i>Refresh on schedule</span>
+            <button class="doc-code__copy" type="button"><i class="ti ti-copy"></i><span
+                class="doc-code__copy-label">Copy</span></button>
+          </div>
+          <pre><code><span class="tk-com"># pull every entry, stage the diff</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">update</span>
+<span class="tk-com"># CI gate: fail if anything is stale</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">update</span> <span class="tk-flag">--check</span>
+</code></pre>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-layout">
+
+    <nav class="doc-toc" aria-label="Contents">
+      <h2 class="doc-toc__h">Contents</h2>
+      <ol class="doc-toc__list">
+        <li><a href="#why"><span>Why</span></a></li>
+        <li><a href="#install"><span>Install</span></a></li>
+        <li><a href="#quick-start"><span>Quick start</span></a></li>
+        <li><a href="#tracking"><span>Tracking a ref</span></a></li>
+        <li><a href="#filtering"><span>Filtering</span></a></li>
+        <li><a href="#config"><span>Configuration</span></a></li>
+        <li><a href="#commands"><span>Commands</span></a></li>
+        <li><a href="#exit-codes"><span>Exit codes</span></a></li>
+        <li><a href="#settings"><span>Settings</span></a></li>
+        <li><a href="#completions"><span>Completions</span></a></li>
+        <li><a href="#patches"><span>Editing content</span></a></li>
+        <li><a href="#faq"><span>FAQ</span></a></li>
+      </ol>
+      <div class="doc-toc__foot">
+        <a href="https://github.com/khwstolle/git-third-party/issues"><i class="ti ti-bug"></i> File an issue</a>
+        <a href="https://github.com/khwstolle/git-third-party"><i class="ti ti-brand-github"></i> Source</a>
+        <a href="https://github.com/khwstolle/git-third-party/blob/master/LICENSE"><i class="ti ti-license"></i> MIT
+          License</a>
+      </div>
+    </nav>
+
+    <main class="doc-main">
+
+      <section id="why" class="doc-section">
+        <header class="doc-section__head">
+          <h2 class="doc-section__title">Why not submodules or subtree?</h2>
+          <p class="doc-section__lede">Submodules attach a foreign pointer to your repo and demand a second clone. Git
+            subtree collapses upstream history into yours and gives you no clean way to refresh. This extension keeps a
+            small declarative state and treats vendored content as your own files — because once it lands in your tree,
+            it belongs there.</p>
+        </header>
+        <div class="doc-section__body">
+          <table class="doc-table doc-table--cmp">
+            <thead>
+              <tr>
+                <th>Concern</th>
+                <th>Submodules</th>
+                <th><code>git subtree</code></th>
+                <th>git-third-party</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Single clone, no extra indirection</td>
+                <td><span class="doc-table__cross">✗</span></td>
+                <td><span class="doc-table__check">✓</span></td>
+                <td><span class="doc-table__check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Visible to grep, IDE, build out of the box</td>
+                <td><span class="doc-table__cross">✗</span></td>
+                <td><span class="doc-table__check">✓</span></td>
+                <td><span class="doc-table__check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Lockfile pinning resolved upstream commits</td>
+                <td><span class="doc-table__cross">✗</span></td>
+                <td><span class="doc-table__partial">history-only</span></td>
+                <td><span class="doc-table__check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Pull only a sub-path or filtered file set</td>
+                <td><span class="doc-table__cross">✗</span></td>
+                <td><span class="doc-table__cross">✗</span></td>
+                <td><span class="doc-table__check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Recurse into upstream submodules</td>
+                <td><span class="doc-table__partial">manual</span></td>
+                <td><span class="doc-table__cross">✗</span></td>
+                <td><span class="doc-table__check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Apply local patches across updates</td>
+                <td><span class="doc-table__cross">✗</span></td>
+                <td><span class="doc-table__partial">manual merge</span></td>
+                <td><span class="doc-table__check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Single-command refresh of all entries</td>
+                <td><span class="doc-table__cross">✗</span></td>
+                <td><span class="doc-table__cross">✗</span></td>
+                <td><span class="doc-table__check">✓</span></td>
+              </tr>
+              <tr>
+                <td>CI gate that fails on stale vendoring</td>
+                <td><span class="doc-table__cross">✗</span></td>
+                <td><span class="doc-table__cross">✗</span></td>
+                <td><span class="doc-table__check">✓</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Compared to <code>git-vendor</code></h3>
+          <p><a href="https://github.com/brettlangdon/git-vendor">brettlangdon/git-vendor</a> is the closest existing
+            tool: a Bash wrapper around <code>git subtree</code> that stores vendoring metadata in squash-merge commit
+            messages and follows a Go-style <code>vendor/&lt;host&gt;/&lt;owner&gt;/&lt;repo&gt;</code> layout. If
+            <code>git subtree</code> already meets your needs and you want a thinner UX on top, it works well.
+          </p>
+          <p>Where <code>git-third-party</code> differs:</p>
+          <ul>
+            <li><strong>Declarative config plus lockfile.</strong> State lives in <code>third-party.toml</code> and
+              <code>third-party.lock</code>, not in commit messages. <code>update --check</code> becomes a one-line CI
+              gate.
+            </li>
+            <li><strong>Path filtering.</strong> <code>--subdir</code>, <code>--include</code>, <code>--exclude</code>
+              let you vendor only the files you actually use.</li>
+            <li><strong>Submodule inlining.</strong> Upstream submodules get recursively materialized;
+              <code>git subtree</code> leaves them as broken pointers.
+            </li>
+            <li><strong>Local patches.</strong> Saved tree-patches reapply via 3-way merge on every update.</li>
+            <li><strong>Bindings.</strong> Python and Node bindings share the same Go core. <code>git-vendor</code> is
+              shell-only.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="install" class="doc-section">
+        <header class="doc-section__head">
+          <h2 class="doc-section__title">Install</h2>
+          <p class="doc-section__lede">Three packages, one binary core. The wheel and the npm package each ship the
+            platform-specific binary; building from source needs Go 1.21 or newer.</p>
+        </header>
+        <div class="doc-section__body">
+          <div class="doc-aside-row">
+            <div>
+              <h3>CLI</h3>
+              <p>Pick whichever package manager you already have. Each distribution ships the same precompiled binary.
+              </p>
+
+              <div class="doc-code">
+                <div class="doc-code__bar"><span class="doc-code__label"><i
+                      class="ti ti-terminal-2"></i>PyPI</span><button class="doc-code__copy" type="button"><i
+                      class="ti ti-copy"></i><span class="doc-code__copy-label">Copy</span></button></div>
+                <pre><code><span class="tk-com"># uv tool is the recommended path:</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">uv</span> <span class="tk-arg">tool</span> <span class="tk-arg">install</span> <span class="tk-arg">git-third-party</span>
+
+<span class="tk-com"># pip works too:</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">pip</span> <span class="tk-arg">install</span> <span class="tk-flag">--user</span> <span class="tk-arg">git-third-party</span>
+</code></pre>
+              </div>
+
+              <div class="doc-code">
+                <div class="doc-code__bar"><span class="doc-code__label"><i
+                      class="ti ti-terminal-2"></i>npm</span><button class="doc-code__copy" type="button"><i
+                      class="ti ti-copy"></i><span class="doc-code__copy-label">Copy</span></button></div>
+                <pre><code><span class="tk-prompt">$ </span><span class="tk-prog">npm</span> <span class="tk-arg">install</span> <span class="tk-flag">-g</span> <span class="tk-arg">git-third-party</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">pnpm</span> <span class="tk-arg">add</span> <span class="tk-flag">-g</span> <span class="tk-arg">git-third-party</span>
+</code></pre>
+              </div>
+
+              <div class="doc-code">
+                <div class="doc-code__bar"><span class="doc-code__label"><i class="ti ti-terminal-2"></i>From
+                    source</span><button class="doc-code__copy" type="button"><i class="ti ti-copy"></i><span
+                      class="doc-code__copy-label">Copy</span></button></div>
+                <pre><code><span class="tk-prompt">$ </span><span class="tk-prog">go</span> <span class="tk-arg">build</span> <span class="tk-flag">-o</span> <span class="tk-arg">~/.local/bin/git-third-party</span> <span class="tk-arg">.</span>
+</code></pre>
+              </div>
+            </div>
+            <aside class="doc-aside">
+              <h4>Prebuilt targets</h4>
+              <ul>
+                <li><code>linux-x64</code></li>
+                <li><code>linux-arm64</code></li>
+                <li><code>darwin-x64</code></li>
+                <li><code>darwin-arm64</code></li>
+                <li><code>win32-x64</code></li>
+              </ul>
+              <p>The <code>git-</code> prefix lets <code>git</code> itself invoke the binary:
+                <code>git third-party update</code> works as well as <code>git third-party update</code>.
+              </p>
+            </aside>
+          </div>
+
+          <h3>Python bindings</h3>
+          <p>The Python wheel bundles a c-shared library, so install needs no Go compiler. Mutating calls accept
+            <code>dry_run=</code> and <code>commit_msg=</code>; every call accepts <code>repo_path=</code>, defaulting
+            to the current directory.
+          </p>
+          <div class="doc-code doc-code--paper">
+            <div class="doc-code__bar"><span class="doc-code__label"><i class="ti ti-file-code"></i>from third_party
+                import …</span><button class="doc-code__copy" type="button"><i class="ti ti-copy"></i><span
+                  class="doc-code__copy-label">Copy</span></button></div>
+            <pre><code>from third_party import init, add, list_, version
+
+print(version())
+init()
+add(dir="vendor/foo", url="https://github.com/x/y", follow="main")
+for e in list_():
+    print(e.dir, e.commit)
+</code></pre>
+          </div>
+          <p>Errors map to <code>GitThirdPartyError</code> and its subclasses: <code>ConfigError</code>,
+            <code>NetworkError</code>, <code>ConflictError</code>, <code>CheckDirtyError</code>.
+          </p>
+
+          <h3>Node bindings</h3>
+          <p>ECMAScript Modules (ESM) only, ships TypeScript types, requires Node 18 or newer. Same options shape as the
+            Python API; same error hierarchy. The bridge serializes calls process-wide — for parallel work, use
+            <code>worker_threads</code>.
+          </p>
+          <div class="doc-code doc-code--paper">
+            <div class="doc-code__bar"><span class="doc-code__label"><i class="ti ti-file-code"></i>import { … } from
+                'git-third-party'</span><button class="doc-code__copy" type="button"><i class="ti ti-copy"></i><span
+                  class="doc-code__copy-label">Copy</span></button></div>
+            <pre><code>import { init, add, list, version } from "git-third-party";
+
+console.log(version());
+init();
+add({ dir: "vendor/foo", url: "https://github.com/x/y", follow: "main" });
+for (const e of list()) {
+  console.log(e.dir, e.commit);
+}
+</code></pre>
+          </div>
+          <p>The npm package distributes platform binaries through <code>optionalDependencies</code>, the same pattern
+            <code>esbuild</code> and <code>swc</code> use. Installs grab a prebuilt binary; no compiler needed.
+          </p>
+        </div>
+      </section>
+
+      <section id="quick-start" class="doc-section">
+        <header class="doc-section__head">
+          <h2 class="doc-section__title">Quick start</h2>
+          <p class="doc-section__lede">Vendor a directory that tracks an upstream branch, then pull updates and stage
+            the diff. Three commands cover the whole loop.</p>
+        </header>
+        <div class="doc-section__body">
+          <h3>Vendor a directory</h3>
+          <div class="doc-code">
+            <div class="doc-code__bar"><span class="doc-code__label"><i class="ti ti-terminal-2"></i>Shell</span><button
+                class="doc-code__copy" type="button"><i class="ti ti-copy"></i><span
+                  class="doc-code__copy-label">Copy</span></button></div>
+            <pre><code><span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">add</span> <span class="tk-arg">third_party/zlib</span> <span class="tk-str">https://github.com/madler/zlib</span> <span class="tk-flag">--follow</span> <span class="tk-arg">master</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git</span> <span class="tk-arg">commit</span> <span class="tk-flag">-m</span> <span class="tk-str">"Vendor zlib"</span>
+</code></pre>
+          </div>
+
+          <h3>Pull updates</h3>
+          <div class="doc-code">
+            <div class="doc-code__bar"><span class="doc-code__label"><i class="ti ti-terminal-2"></i>Shell</span><button
+                class="doc-code__copy" type="button"><i class="ti ti-copy"></i><span
+                  class="doc-code__copy-label">Copy</span></button></div>
+            <pre><code><span class="tk-com"># all entries:</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">update</span>
+
+<span class="tk-com"># one entry:</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">update</span> <span class="tk-arg">third_party/zlib</span>
+
+<span class="tk-com"># dry-run — would anything change?</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">status</span>
+
+<span class="tk-prompt">$ </span><span class="tk-prog">git</span> <span class="tk-arg">commit</span> <span class="tk-flag">-m</span> <span class="tk-str">"Update vendored zlib"</span>
+</code></pre>
+          </div>
+
+          <h3>List, rename, remove</h3>
+          <div class="doc-code">
+            <div class="doc-code__bar"><span class="doc-code__label"><i class="ti ti-terminal-2"></i>Shell</span><button
+                class="doc-code__copy" type="button"><i class="ti ti-copy"></i><span
+                  class="doc-code__copy-label">Copy</span></button></div>
+            <pre><code><span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">list</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">rename</span> <span class="tk-arg">third_party/zlib</span> <span class="tk-arg">vendor/zlib</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">remove</span> <span class="tk-arg">vendor/zlib</span>
+</code></pre>
+          </div>
+
+          <div class="doc-flow">
+            <h3 class="doc-flow__h"><i class="ti ti-route"></i> What <code>update</code> does</h3>
+            <div class="doc-flow__steps">
+              <div class="doc-flow__step"><span class="doc-flow__step-num">01</span>
+                <div class="doc-flow__step-title">Resolve</div>
+                <div class="doc-flow__step-desc">Look up the configured ref against the upstream remote.</div>
+              </div>
+              <div class="doc-flow__step"><span class="doc-flow__step-num">02</span>
+                <div class="doc-flow__step-title">Walk</div>
+                <div class="doc-flow__step-desc">Apply --subdir, --include, --exclude; recurse into upstream submodules.
+                </div>
+              </div>
+              <div class="doc-flow__step"><span class="doc-flow__step-num">03</span>
+                <div class="doc-flow__step-title">Re-patch</div>
+                <div class="doc-flow__step-desc">3-way merge any saved tree-patch against the new upstream tree.</div>
+              </div>
+              <div class="doc-flow__step"><span class="doc-flow__step-num">04</span>
+                <div class="doc-flow__step-title">Splice</div>
+                <div class="doc-flow__step-desc">Write the result into your working tree at the configured path.</div>
+              </div>
+              <div class="doc-flow__step"><span class="doc-flow__step-num">05</span>
+                <div class="doc-flow__step-title">Stage</div>
+                <div class="doc-flow__step-desc">git add the diff. Garbage-collect refs no longer in use.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tracking" class="doc-section">
+        <header class="doc-section__head">
+          <h2 class="doc-section__title">Tracking a ref</h2>
+          <p class="doc-section__lede">Each entry tracks one of: a moving branch tip, a pinned tag, or a commit SHA.</p>
+        </header>
+        <div class="doc-section__body">
+          <dl class="doc-def">
+            <div class="doc-def__row">
+              <dt class="doc-def__term">--follow &lt;branch&gt;</dt>
+              <dd class="doc-def__desc">Track the branch tip and re-resolve on every <code>update</code>. Default when
+                neither flag is set (resolved from the remote's <code>HEAD</code>).</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">--pin &lt;tag-or-sha&gt;</dt>
+              <dd class="doc-def__desc">Pin to a tag (resolved once and then cached) or to a commit SHA (used as-is).
+                40-hex-character strings count as SHAs.</dd>
+            </div>
+          </dl>
+          <p>Switch tracking mode with <code>set</code>:</p>
+          <div class="doc-code">
+            <div class="doc-code__bar"><span class="doc-code__label"><i class="ti ti-terminal-2"></i>Shell</span><button
+                class="doc-code__copy" type="button"><i class="ti ti-copy"></i><span
+                  class="doc-code__copy-label">Copy</span></button></div>
+            <pre><code><span class="tk-com"># pin to a tag:</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">set</span> <span class="tk-arg">vendor/zlib</span> <span class="tk-flag">--pin</span> <span class="tk-arg">v1.3.1</span>
+<span class="tk-com"># back to a moving branch tip:</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">set</span> <span class="tk-arg">vendor/zlib</span> <span class="tk-flag">--follow</span> <span class="tk-arg">master</span>
+</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="filtering" class="doc-section">
+        <header class="doc-section__head">
+          <h2 class="doc-section__title">Filtering content</h2>
+          <p class="doc-section__lede">Most upstream repos contain test fixtures, CI config, docs, examples, and build
+            systems you don't need. Three flags keep only the files you use.</p>
+        </header>
+        <div class="doc-section__body">
+          <div class="doc-code">
+            <div class="doc-code__bar"><span class="doc-code__label"><i class="ti ti-terminal-2"></i>Shell</span><button
+                class="doc-code__copy" type="button"><i class="ti ti-copy"></i><span
+                  class="doc-code__copy-label">Copy</span></button></div>
+            <pre><code><span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">add</span> <span class="tk-arg">vendor/foo</span> <span class="tk-str">https://example.com/foo.git</span> \
+    <span class="tk-flag">--subdir</span> <span class="tk-arg">src</span> \
+    <span class="tk-flag">--include</span> <span class="tk-str">'*.c'</span> <span class="tk-flag">--include</span> <span class="tk-str">'*.h'</span> \
+    <span class="tk-flag">--exclude</span> <span class="tk-str">'tests/'</span>
+</code></pre>
+          </div>
+          <dl class="doc-def">
+            <div class="doc-def__row">
+              <dt class="doc-def__term">--subdir DIR</dt>
+              <dd class="doc-def__desc">Start from a subdirectory of the upstream repo. Other paths are dropped before
+                include/exclude run.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">--include PATTERN<span class="doc-def__alt"> &middot; repeatable</span></dt>
+              <dd class="doc-def__desc">Keep only matching paths. Default keeps everything.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">--exclude PATTERN<span class="doc-def__alt"> &middot; repeatable</span></dt>
+              <dd class="doc-def__desc">Drop matching paths. Always wins over --include.</dd>
+            </div>
+          </dl>
+          <p>Patterns follow <code>.gitignore</code> rules with documented deviations: no trailing <code>/**</code>, no
+            <code>.</code> or <code>..</code> segments. See <code>git third-party add --help</code> for the full
+            specification. Upstream submodules inline recursively unless excluded.
+          </p>
+        </div>
+      </section>
+
+      <section id="config" class="doc-section">
+        <header class="doc-section__head">
+          <h2 class="doc-section__title">Configuration files</h2>
+          <p class="doc-section__lede">Two files live at the repository root; commit both alongside the vendored
+            content.</p>
+        </header>
+        <div class="doc-section__body">
+          <dl class="doc-def">
+            <div class="doc-def__row">
+              <dt class="doc-def__term">third-party.toml<span class="doc-def__alt"> &middot; hand-edited</span></dt>
+              <dd class="doc-def__desc">Hand-editable intent. Each <code>[[third_party]]</code> table is one vendored
+                directory. Each <code>add</code>/<code>set</code>/<code>rename</code>/<code>remove</code> rewrites the
+                file, dropping any user comments.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">third-party.lock<span class="doc-def__alt"> &middot; generated</span></dt>
+              <dd class="doc-def__desc">Records the resolved commit and any saved tree-patch per entry. Sorted by
+                <code>dir</code> for stable diffs. Do not edit by hand.
+              </dd>
+            </div>
+          </dl>
+
+          <h3>Example third-party.toml</h3>
+          <div class="doc-code doc-code--paper">
+            <div class="doc-code__bar"><span class="doc-code__label"><i
+                  class="ti ti-file-code"></i>third-party.toml</span><button class="doc-code__copy" type="button"><i
+                  class="ti ti-copy"></i><span class="doc-code__copy-label">Copy</span></button></div>
+            <pre><code><span class="tk-com"># git third-party — vendored content config.</span>
+
+<span class="tk-section">[[third_party]]</span>
+<span class="tk-key">dir</span> = <span class="tk-str">"third_party/zlib"</span>
+<span class="tk-key">url</span> = <span class="tk-str">"https://github.com/madler/zlib"</span>
+<span class="tk-key">follow</span> = <span class="tk-str">"master"</span>
+
+<span class="tk-section">[[third_party]]</span>
+<span class="tk-key">dir</span> = <span class="tk-str">"vendor/foo"</span>
+<span class="tk-key">url</span> = <span class="tk-str">"https://example.com/foo.git"</span>
+<span class="tk-key">pin</span> = <span class="tk-str">"v1.3.1"</span>
+<span class="tk-key">subdir</span> = <span class="tk-str">"src"</span>
+<span class="tk-key">include</span> = [<span class="tk-str">"*.c"</span>, <span class="tk-str">"*.h"</span>]
+<span class="tk-key">exclude</span> = [<span class="tk-str">"tests/"</span>]
+</code></pre>
+          </div>
+
+          <h3>Corresponding third-party.lock</h3>
+          <div class="doc-code doc-code--paper">
+            <div class="doc-code__bar"><span class="doc-code__label"><i
+                  class="ti ti-file-code"></i>third-party.lock</span><button class="doc-code__copy" type="button"><i
+                  class="ti ti-copy"></i><span class="doc-code__copy-label">Copy</span></button></div>
+            <pre><code><span class="tk-com"># git third-party lockfile — generated; do not edit by hand.</span>
+<span class="tk-key">version</span> = <span class="tk-num">1</span>
+
+<span class="tk-section">[[third_party]]</span>
+<span class="tk-key">dir</span> = <span class="tk-str">"third_party/zlib"</span>
+<span class="tk-key">commit</span> = <span class="tk-str">"abc1234567890abcdef1234567890abcdef12345"</span>
+
+<span class="tk-section">[[third_party]]</span>
+<span class="tk-key">dir</span> = <span class="tk-str">"vendor/foo"</span>
+<span class="tk-key">commit</span> = <span class="tk-str">"def4567890abcdef1234567890abcdef12345678"</span>
+</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="commands" class="doc-section">
+        <header class="doc-section__head">
+          <h2 class="doc-section__title">Command reference</h2>
+          <p class="doc-section__lede">The full CLI surface. The table lists aliases where they exist; every command is
+            also reachable as <code>git third-party &lt;verb&gt;</code>.</p>
+        </header>
+        <div class="doc-section__body">
+          <table class="doc-table doc-table--cmd">
+            <thead>
+              <tr>
+                <th>Command</th>
+                <th>Aliases</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>init</code></td>
+                <td>—</td>
+                <td>Create an empty third-party.toml. Most users skip this — add creates it.</td>
+              </tr>
+              <tr>
+                <td><code>add DIR URL</code></td>
+                <td>—</td>
+                <td>Register a new entry and download it.</td>
+              </tr>
+              <tr>
+                <td><code>set DIR …</code></td>
+                <td><code>edit</code></td>
+                <td>Change URL, ref, or filters for an existing entry.</td>
+              </tr>
+              <tr>
+                <td><code>unset DIR FIELD…</code></td>
+                <td>—</td>
+                <td>Clear subdir, include, or exclude on an entry.</td>
+              </tr>
+              <tr>
+                <td><code>update [DIR]</code></td>
+                <td><code>up</code></td>
+                <td>Re-fetch and stage updates.</td>
+              </tr>
+              <tr>
+                <td><code>status [DIR]</code></td>
+                <td><code>st</code></td>
+                <td><code>update --dry-run</code>.</td>
+              </tr>
+              <tr>
+                <td><code>list [DIR]</code></td>
+                <td><code>ls</code></td>
+                <td>Show entries and their tracking mode.</td>
+              </tr>
+              <tr>
+                <td><code>info DIR</code></td>
+                <td><code>show</code></td>
+                <td>Print full details for one entry.</td>
+              </tr>
+              <tr>
+                <td><code>rename DIR NEW_DIR</code></td>
+                <td><code>mv</code></td>
+                <td>Move a vendored directory and update the config.</td>
+              </tr>
+              <tr>
+                <td><code>remove DIR</code></td>
+                <td><code>rm</code></td>
+                <td>Unregister a directory and <code>git rm -r</code> its content.</td>
+              </tr>
+              <tr>
+                <td><code>patch save DIR</code> <span class="doc-tag doc-tag--exp">experimental</span></td>
+                <td>—</td>
+                <td>Record local edits as a tree-patch.</td>
+              </tr>
+              <tr>
+                <td><code>patch diff DIR</code> <span class="doc-tag doc-tag--exp">experimental</span></td>
+                <td>—</td>
+                <td>Show the saved tree-patch via git diff.</td>
+              </tr>
+              <tr>
+                <td><code>completion SHELL</code></td>
+                <td>—</td>
+                <td>Print a bash/zsh/fish/powershell completion script.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Common flags</h3>
+          <dl class="doc-def">
+            <div class="doc-def__row">
+              <dt class="doc-def__term">-v / -vv / -q<span class="doc-def__alt"> &middot; logging</span></dt>
+              <dd class="doc-def__desc">Debug, trace, or warn-only output. --log-level=trace|debug|info|warn|error sets
+                the level explicitly.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">--log-format=text|json</dt>
+              <dd class="doc-def__desc">Switch the stderr handler to JSON for machine-readable logs.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">--color=auto|always|never</dt>
+              <dd class="doc-def__desc">Honors <code>NO_COLOR</code>.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">--dry-run</dt>
+              <dd class="doc-def__desc">Plan without staging.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">-f / --allow-dir-exists</dt>
+              <dd class="doc-def__desc">Let add and rename write into a non-empty target.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">--profile PATH</dt>
+              <dd class="doc-def__desc">Write a CPU profile.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">--json</dt>
+              <dd class="doc-def__desc">Emit a structured <code>entryResult</code> (or array) on stdout instead of human
+                text. Schema lives in <code>output.go</code>.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">--commit MSG</dt>
+              <dd class="doc-def__desc">Run <code>git commit -m MSG</code> after the command stages changes.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">--check<span class="doc-def__alt"> &middot; update / status</span></dt>
+              <dd class="doc-def__desc">Exit non-zero if any entry would change. Useful in CI and pre-commit hooks.</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section id="exit-codes" class="doc-section">
+        <header class="doc-section__head">
+          <h2 class="doc-section__title">Exit codes</h2>
+          <p class="doc-section__lede">Stable for scripting. Wire status and update --check into CI.</p>
+        </header>
+        <div class="doc-section__body">
+          <table class="doc-table doc-table--exit">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0</td>
+                <td>Success.</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Generic failure.</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Configuration invalid (TOML parse, validation, lockfile schema mismatch).</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Network, fetch, or ref-resolution failure.</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>Unresolvable merge conflict during update.</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td><code>--check</code> detected a pending change.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="doc-aside-row">
+            <div>
+              <div class="doc-code doc-code--paper">
+                <div class="doc-code__bar"><span class="doc-code__label"><i
+                      class="ti ti-file-code"></i>.github/workflows/vendor.yml</span><button class="doc-code__copy"
+                    type="button"><i class="ti ti-copy"></i><span class="doc-code__copy-label">Copy</span></button>
+                </div>
+                <pre><code>- name: Verify vendoring is up to date
+  run: git third-party update --check
+</code></pre>
+              </div>
+            </div>
+            <aside class="doc-aside">
+              <h4>CI gate</h4>
+              <p>Wire <code>git third-party update --check</code> into a pre-commit hook or CI job to fail on stale
+                vendoring. It exits with code 5 if any entry would change.</p>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="settings" class="doc-section">
+        <header class="doc-section__head">
+          <h2 class="doc-section__title">Settings</h2>
+          <p class="doc-section__lede">Settings resolve through five layers, each overriding the previous: built-in
+            defaults, per-user git config, the repository's [settings] table, environment variables, CLI flags.</p>
+        </header>
+        <div class="doc-section__body">
+          <ol>
+            <li>Built-in defaults.</li>
+            <li>Per-user: <code>git config --global third-party.&lt;key&gt;</code>.</li>
+            <li>Per-repo: a <code>[settings]</code> table in <code>third-party.toml</code>.</li>
+            <li>Environment variables.</li>
+            <li>CLI flags.</li>
+          </ol>
+
+          <h3>Environment variables</h3>
+          <dl class="doc-def">
+            <div class="doc-def__row">
+              <dt class="doc-def__term">GIT_THIRD_PARTY_LOG_LEVEL</dt>
+              <dd class="doc-def__desc">Same as <code>--log-level</code>: trace, debug, info, warn, error.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">GIT_THIRD_PARTY_LOG_FORMAT</dt>
+              <dd class="doc-def__desc">Same as <code>--log-format</code>: text or json.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">GIT_THIRD_PARTY_COLOR</dt>
+              <dd class="doc-def__desc">Same as <code>--color</code>: auto, always, never.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">GIT_THIRD_PARTY_EXPERIMENTAL</dt>
+              <dd class="doc-def__desc">Comma-separated feature names; same as <code>--experimental</code>.</dd>
+            </div>
+            <div class="doc-def__row">
+              <dt class="doc-def__term">NO_COLOR<span class="doc-def__alt"> &middot; cross-tool</span></dt>
+              <dd class="doc-def__desc">Standard convention; disables ANSI color even when <code>--color=auto</code>.
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section id="completions" class="doc-section">
+        <header class="doc-section__head">
+          <h2 class="doc-section__title">Shell completions</h2>
+          <p class="doc-section__lede">Generate completion scripts for the major shells.</p>
+        </header>
+        <div class="doc-section__body">
+          <div class="doc-code">
+            <div class="doc-code__bar"><span class="doc-code__label"><i class="ti ti-terminal-2"></i>Shell</span><button
+                class="doc-code__copy" type="button"><i class="ti ti-copy"></i><span
+                  class="doc-code__copy-label">Copy</span></button></div>
+            <pre><code><span class="tk-com"># bash</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">source</span> &lt;(<span class="tk-prog">git third-party</span> <span class="tk-arg">completion</span> <span class="tk-arg">bash</span>)
+
+<span class="tk-com"># zsh</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">completion</span> <span class="tk-arg">zsh</span> &gt; <span class="tk-str">"${fpath[1]}/_git third-party"</span>
+
+<span class="tk-com"># fish</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">completion</span> <span class="tk-arg">fish</span> &gt; <span class="tk-arg">~/.config/fish/completions/git-third-party.fish</span>
+</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="patches" class="doc-section">
+        <header class="doc-section__head">
+          <h2 class="doc-section__title">Editing vendored content</h2>
+          <p>
+            <span class="doc-tag doc-tag--exp">Experimental</span>
+          </p>
+          <p class="doc-section__lede">Record local modifications as a tree-level patch; <code>update</code> re-applies
+            it on every refresh. </p>
+        </header>
+        <div class="doc-section__body">
+          <p>If you need to modify vendored code — a typo fix, a small portability tweak — record it as a tree-level
+            patch. <code>update</code> re-applies the patch via 3-way merge. Conflicts get tagged with a
+            <code>-conflicts</code> suffix in the lockfile, keeping conflicts visible until resolved.
+          </p>
+
+          <div class="doc-aside-row">
+            <div>
+              <div class="doc-code">
+                <div class="doc-code__bar"><span class="doc-code__label"><i
+                      class="ti ti-terminal-2"></i>Shell</span><button class="doc-code__copy" type="button"><i
+                      class="ti ti-copy"></i><span class="doc-code__copy-label">Copy</span></button></div>
+                <pre><code><span class="tk-com"># enable the experimental feature once</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git</span> <span class="tk-arg">config</span> <span class="tk-flag">--global</span> <span class="tk-arg">third-party.experimental</span> <span class="tk-arg">patch</span>
+
+<span class="tk-com"># record local edits as a tree-patch</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">patch</span> <span class="tk-arg">save</span> <span class="tk-arg">vendor/foo</span>
+
+<span class="tk-com"># inspect the saved patch via git diff</span>
+<span class="tk-prompt">$ </span><span class="tk-prog">git third-party</span> <span class="tk-arg">patch</span> <span class="tk-arg">diff</span> <span class="tk-arg">vendor/foo</span>
+</code></pre>
+              </div>
+            </div>
+            <aside class="doc-aside">
+              <h4>Opt-in</h4>
+              <p>The <code>patch</code> subtree is gated behind an experimental flag. Enable it once per user, per repo,
+                or per invocation:</p>
+              <ul>
+                <li><code>--experimental=patch</code> (or <code>-Z patch</code>)</li>
+                <li><code>experimental = ["patch"]</code> in <code>[settings]</code></li>
+                <li><code>git config --global third-party.experimental patch</code></li>
+              </ul>
+            </aside>
+          </div>
+
+          <p>If <code>update</code> produces conflicts, <code>git-third-party</code> stores the patch with a
+            <code>-conflicts</code> suffix; resolve with <code>git add</code> followed by another
+            <code>patch save</code>. Review the resulting commits carefully — the feature is experimental for a reason.
+          </p>
+        </div>
+      </section>
+
+      <section id="faq" class="doc-section">
+        <header class="doc-section__head">
+          <h2 class="doc-section__title">FAQ</h2>
+          <p class="doc-section__lede">Common questions, short answers.</p>
+        </header>
+        <div class="doc-section__body">
+          <div class="doc-faq">
+            <div class="doc-faq__item">
+              <button class="doc-faq__q" type="button"><span>Is this a Git submodule alternative?</span><i
+                  class="ti ti-plus"></i></button>
+              <div class="doc-faq__a">
+                <div class="doc-faq__a-inner">
+                  <p>Yes. Vendored content lives directly in your tree — no <code>.gitmodules</code>, no second clone,
+                    no submodule pointer to forget.</p>
+                </div>
+              </div>
+            </div>
+            <div class="doc-faq__item">
+              <button class="doc-faq__q" type="button"><span>How does it differ from git subtree?</span><i
+                  class="ti ti-plus"></i></button>
+              <div class="doc-faq__a">
+                <div class="doc-faq__a-inner">
+                  <p><code>git subtree</code> merges upstream history into yours, which makes refreshing painful and
+                    obscures provenance. <code>git-third-party</code> keeps a tiny declarative state — intent plus lock
+                    — and rewrites the tree on update. Closer to a package manager than a Git operation.</p>
+                </div>
+              </div>
+            </div>
+            <div class="doc-faq__item">
+              <button class="doc-faq__q" type="button"><span>Can I vendor only part of an upstream repo?</span><i
+                  class="ti ti-plus"></i></button>
+              <div class="doc-faq__a">
+                <div class="doc-faq__a-inner">
+                  <p>Yes. <code>--subdir</code> starts from a subdirectory; <code>--include</code> and
+                    <code>--exclude</code> filter individual paths.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="doc-faq__item">
+              <button class="doc-faq__q" type="button"><span>What happens when upstream commits new code?</span><i
+                  class="ti ti-plus"></i></button>
+              <div class="doc-faq__a">
+                <div class="doc-faq__a-inner">
+                  <p><code>git third-party update</code> re-resolves the ref, fetches the new commit, applies your
+                    filters, re-applies any saved local patches, and stages the result. You commit it.</p>
+                </div>
+              </div>
+            </div>
+            <div class="doc-faq__item">
+              <button class="doc-faq__q" type="button"><span>Can I pin to a specific tag or commit?</span><i
+                  class="ti ti-plus"></i></button>
+              <div class="doc-faq__a">
+                <div class="doc-faq__a-inner">
+                  <p>Yes. <code>--pin v1.3.1</code> or <code>--pin &lt;40-hex-sha&gt;</code>. Tags resolve once and
+                    freeze; SHAs go through verbatim.</p>
+                </div>
+              </div>
+            </div>
+            <div class="doc-faq__item">
+              <button class="doc-faq__q" type="button"><span>Does it work with private repositories?</span><i
+                  class="ti ti-plus"></i></button>
+              <div class="doc-faq__a">
+                <div class="doc-faq__a-inner">
+                  <p>Yes. Authentication uses your existing Git configuration — anything that works for
+                    <code>git fetch</code> works here.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="doc-faq__item">
+              <button class="doc-faq__q" type="button"><span>Is there a CI gate I can use?</span><i
+                  class="ti ti-plus"></i></button>
+              <div class="doc-faq__a">
+                <div class="doc-faq__a-inner">
+                  <p><code>git third-party update --check</code> exits non-zero (code 5) if any entry would change. Wire
+                    it into a pre-commit hook or CI job to fail on stale vendoring.</p>
+                </div>
+              </div>
+            </div>
+            <div class="doc-faq__item">
+              <button class="doc-faq__q" type="button"><span>Why both Python and Node bindings?</span><i
+                  class="ti ti-plus"></i></button>
+              <div class="doc-faq__a">
+                <div class="doc-faq__a-inner">
+                  <p>Many monorepo automation systems use one or the other. Both bindings call into the same Go core
+                    through a cgo bridge, so behavior matches the CLI exactly.</p>
+                </div>
+              </div>
+            </div>
+            <div class="doc-faq__item">
+              <button class="doc-faq__q" type="button"><span>What are the runtime dependencies?</span><i
+                  class="ti ti-plus"></i></button>
+              <div class="doc-faq__a">
+                <div class="doc-faq__a-inner">
+                  <p><code>git</code> on <code>PATH</code>. The bindings also need CPython or Node 18 or newer. Every
+                    distribution ships a precompiled binary, so runtime needs no Go compiler.</p>
+                </div>
+              </div>
+            </div>
+            <div class="doc-faq__item">
+              <button class="doc-faq__q" type="button"><span>Where is the source and how do I file an issue?</span><i
+                  class="ti ti-plus"></i></button>
+              <div class="doc-faq__a">
+                <div class="doc-faq__a-inner">
+                  <p><a href="https://github.com/khwstolle/git-third-party">github.com/khwstolle/git-third-party</a>.
+                    Issues and pull requests welcome.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="doc-footer">
+    <div class="doc-footer__inner">
+      <div>
+        <span class="brand-mark" role="img" aria-label="git-third-party">
+          <span class="brand-mark__pop" aria-hidden="true">🎉</span>
+          <span class="brand-mark__word">git<span class="brand-mark__hy brand-mark__hy--red">-</span>third<span
+              class="brand-mark__hy brand-mark__hy--yel">-</span>party</span>
+        </span>
+        <p>A declarative replacement for submodules and subtree merges. Upstream content lands in your tree as plain
+          files, visible to every build tool and IDE, with Python and Node bindings for automation.</p>
+      </div>
+      <div>
+        <h6>Documentation</h6>
+        <ul>
+          <li><a href="#install">Install</a></li>
+          <li><a href="#quick-start">Quick start</a></li>
+          <li><a href="#commands">Command reference</a></li>
+          <li><a href="#settings">Settings</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Distributions</h6>
+        <ul>
+          <li><a href="https://pypi.org/project/git-third-party/"><i class="ti ti-brand-python"></i> PyPI</a></li>
+          <li><a href="https://www.npmjs.com/package/git-third-party"><i class="ti ti-brand-npm"></i> npm</a></li>
+          <li><a href="https://github.com/khwstolle/git-third-party/releases"><i class="ti ti-binary-tree"></i> Prebuilt
+              binaries</a></li>
+        </ul>
+      </div>
+      <div>
+        <h6>Project</h6>
+        <ul>
+          <li><a href="https://github.com/khwstolle/git-third-party"><i class="ti ti-brand-github"></i> Source</a></li>
+          <li><a href="https://github.com/khwstolle/git-third-party/issues"><i class="ti ti-bug"></i> Issues</a></li>
+          <li><a href="https://github.com/khwstolle/git-third-party/releases"><i class="ti ti-tag"></i> Releases</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="doc-footer__bottom">
+      <span>© 2026 git-third-party contributors</span>
+    </div>
+  </footer>
+
+  <script src="site.js" defer></script>
+</body>
+
+</html>
