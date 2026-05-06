@@ -1,0 +1,197 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # required for PyPI trusted publishing (OIDC)
+
+jobs:
+  build-wheels:
+    name: wheel ${{ matrix.target.goos }}/${{ matrix.target.goarch }}
+    runs-on: ${{ matrix.target.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - {os: ubuntu-latest, goos: linux, goarch: amd64}
+          - {os: ubuntu-latest, goos: linux, goarch: arm64}
+          - {os: macos-13, goos: darwin, goarch: amd64}
+          - {os: macos-14, goos: darwin, goarch: arm64}
+          - {os: windows-latest, goos: windows, goarch: amd64}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --upgrade hatch
+      # Cross-compile cgo for linux/arm64 from a linux/amd64 runner. Other
+      # non-host targets (darwin/*, windows/*) build natively on their own
+      # runners, so cgo just works.
+      - name: Install aarch64 toolchain
+        if: matrix.target.goos == 'linux' && matrix.target.goarch == 'arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+          echo "CC=aarch64-linux-gnu-gcc" >>"$GITHUB_ENV"
+      - name: Build wheel
+        env:
+          HATCH_GOOS: ${{ matrix.target.goos }}
+          HATCH_GOARCH: ${{ matrix.target.goarch }}
+        run: hatch build -t wheel
+      - name: Show wheel contents (sanity)
+        shell: bash
+        run: |
+          for whl in dist/*.whl; do
+            echo "=== $whl ==="
+            python -m zipfile -l "$whl"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel-${{ matrix.target.goos }}-${{ matrix.target.goarch }}
+          path: dist/*.whl
+
+  build-sdist:
+    name: sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --upgrade hatch
+      - run: hatch build -t sdist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  publish-pypi:
+    name: publish to PyPI
+    needs: [build-wheels, build-sdist]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: pypi
+      url: https://pypi.org/p/git-third-party
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: List dist
+        run: ls -la dist/
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  build-npm-platform:
+    name: npm ${{ matrix.target.suffix }}
+    runs-on: ${{ matrix.target.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - {os: ubuntu-latest, goos: linux, goarch: amd64, suffix: linux-x64}
+          - {os: ubuntu-latest, goos: linux, goarch: arm64, suffix: linux-arm64}
+          - {os: macos-13, goos: darwin, goarch: amd64, suffix: darwin-x64}
+          - {os: macos-14, goos: darwin, goarch: arm64, suffix: darwin-arm64}
+          - {os: windows-latest, goos: windows, goarch: amd64, suffix: win32-x64}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      # Cross-compile cgo for linux/arm64 from a linux/amd64 runner.
+      - name: Install aarch64 toolchain
+        if: matrix.target.suffix == 'linux-arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+          echo "CC=aarch64-linux-gnu-gcc" >>"$GITHUB_ENV"
+      - name: Build platform package
+        shell: bash
+        env:
+          GOOS: ${{ matrix.target.goos }}
+          GOARCH: ${{ matrix.target.goarch }}
+          VERSION: ${{ github.ref_name && startsWith(github.ref, 'refs/tags/v') &&
+            github.ref_name || '0.0.0-dev' }}
+        run: |
+          # github.ref_name for v1.2.3 is "v1.2.3"; strip the leading v.
+          VERSION="${VERSION#v}"
+          export VERSION
+          ./npm/build-platform-package.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-${{ matrix.target.suffix }}
+          path: npm/dist/git-third-party-${{ matrix.target.suffix }}
+
+  build-npm-main:
+    name: npm main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install + build
+        working-directory: npm/git-third-party
+        run: |
+          npm ci || npm install
+          npm run build
+      - name: Pack tarball
+        working-directory: npm/git-third-party
+        run: npm pack --pack-destination ../dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-main
+          path: npm/dist/*.tgz
+
+  publish-npm:
+    name: publish to npm
+    needs: [build-npm-platform, build-npm-main]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/git-third-party
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Download platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: npm/dist
+          pattern: npm-*
+      - name: Show downloaded layout
+        run: ls -laR npm/dist
+      - name: Publish platform packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -e
+          for dir in npm/dist/npm-linux-x64 npm/dist/npm-linux-arm64 \
+                     npm/dist/npm-darwin-x64 npm/dist/npm-darwin-arm64 \
+                     npm/dist/npm-win32-x64; do
+            echo "=== publishing $dir ==="
+            (cd "$dir" && npm publish --provenance --access public)
+          done
+      - name: Publish main package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          tarball=$(ls npm/dist/npm-main/*.tgz | head -n1)
+          npm publish --provenance --access public "$tarball"
