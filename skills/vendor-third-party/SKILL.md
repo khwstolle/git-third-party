@@ -221,7 +221,3 @@ git-third-party --experimental=patch patch diff vendor/foo
 - **`--check` exits 5, not 1.** Scripts that treat any non-zero as fatal still work, but a CI job that distinguishes vendoring drift from other failures should special-case 5.
 - **Submodule recursion is total.** Upstream `.gitmodules` entries inline recursively. A private or dead upstream submodule URL fails the whole `update` with exit 3 — exclude that path or vendor the submodule directly.
 - **Logging vs. tool output split by stream.** Diagnostics go to stderr via slog; machine-readable output and human messages go to stdout. When piping `--json` into `jq`, leave stderr alone.
-
-## When extending the tool itself
-
-When the user is editing this repo's source rather than using the tool, prefer the project's `CLAUDE.md` over this skill — that file documents architecture, the file map, the `git()` helper, and the settings/observability flow. This skill is for *consumers* of the tool.
