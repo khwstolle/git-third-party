@@ -179,8 +179,6 @@ jobs:
       - name: Show downloaded layout
         run: ls -laR npm/dist
       - name: Publish platform packages
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -e
           for dir in npm/dist/npm-linux-x64 npm/dist/npm-linux-arm64 \
@@ -190,8 +188,6 @@ jobs:
             (cd "$dir" && npm publish --provenance --access public)
           done
       - name: Publish main package
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           tarball=$(ls npm/dist/npm-main/*.tgz | head -n1)
           npm publish --provenance --access public "$tarball"
