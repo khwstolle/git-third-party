@@ -125,10 +125,11 @@ jobs:
       name: pypi
       url: https://pypi.org/p/git-third-party
     steps:
-      - name: Download all artifacts
+      - name: Download wheel artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist
+          pattern: wheel-*
           merge-multiple: true
       - name: List dist
         run: ls -la dist/
@@ -191,7 +192,9 @@ jobs:
           npm run build
       - name: Pack tarball
         working-directory: node/git-third-party
-        run: npm pack --pack-destination ../dist
+        run: |
+          mkdir -p ../dist
+          npm pack --pack-destination ../dist
       - uses: actions/upload-artifact@v4
         with:
           name: npm-main
