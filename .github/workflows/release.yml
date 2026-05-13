@@ -1,4 +1,4 @@
-name: release
+name: Release
 
 on:
   push:
@@ -17,10 +17,10 @@ jobs:
       fail-fast: false
       matrix:
         target:
-          - {os: ubuntu-latest,  goos: linux,   goarch: amd64,  suffix: linux-amd64}
-          - {os: ubuntu-latest,  goos: linux,   goarch: arm64,  suffix: linux-arm64}
-          - {os: macos-latest,   goos: darwin,  goarch: arm64,  suffix: darwin-arm64}
-          - {os: windows-latest, goos: windows, goarch: amd64,  suffix: windows-amd64}
+          - {os: ubuntu-latest, goos: linux, goarch: amd64, suffix: linux-amd64}
+          - {os: ubuntu-latest, goos: linux, goarch: arm64, suffix: linux-arm64}
+          - {os: macos-latest, goos: darwin, goarch: arm64, suffix: darwin-arm64}
+          - {os: windows-latest, goos: windows, goarch: amd64, suffix: windows-amd64}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -67,7 +67,6 @@ jobs:
         with:
           files: release-assets/*
           generate_release_notes: true
-
 
   build-wheels:
     name: wheel ${{ matrix.target.goos }}/${{ matrix.target.goarch }}
