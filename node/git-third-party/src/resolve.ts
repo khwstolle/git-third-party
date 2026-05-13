@@ -14,7 +14,6 @@ const PLATFORM_TABLE: Record<string, Record<string, { pkg: string; lib: string }
     arm64: { pkg: "git-third-party-linux-arm64", lib: "libgitthirdparty.so" },
   },
   darwin: {
-    x64: { pkg: "git-third-party-darwin-x64", lib: "libgitthirdparty.dylib" },
     arm64: { pkg: "git-third-party-darwin-arm64", lib: "libgitthirdparty.dylib" },
   },
   win32: {
@@ -29,7 +28,7 @@ function platformKey(): { pkg: string; lib: string; binSuffix: string } {
   if (!row) {
     throw new Error(
       `git-third-party: no prebuilt binaries for ${os}/${arch}. ` +
-        `Supported: linux-x64, linux-arm64, darwin-x64, darwin-arm64, win32-x64.`,
+        `Supported: linux-x64, linux-arm64, darwin-arm64, win32-x64.`,
     );
   }
   return { pkg: row.pkg, lib: row.lib, binSuffix: os === "win32" ? ".exe" : "" };

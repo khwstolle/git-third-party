@@ -8,7 +8,7 @@
 
 Vendor third-party git content into your repo as ordinary files — no submodules.
 
-Three surfaces, one Go core: a `git-third-party` CLI, Python bindings (`import third_party`), and Node bindings (`import { add, list, ... } from 'git-third-party'`). All three speak the same `third-party.toml` / `third-party.lock` config and share the same cgo bridge for in-process calls.
+Three surfaces, one Go core: a `git-third-party` CLI, Python bindings (`import git_third_party`), and Node bindings (`import { add, list, ... } from 'git-third-party'`). All three speak the same `third-party.toml` / `third-party.lock` config and share the same cgo bridge for in-process calls.
 
 `third-party.toml` records each entry's source URL, the ref it tracks, and any filters applied. `third-party.lock` pins the resolved commits. `git-third-party update` re-fetches upstream and stages the changes.
 
@@ -52,7 +52,7 @@ uv tool install git-third-party    # or pip install
 ```
 
 ```py
-from third_party import init, add, list_, version
+from git_third_party import init, add, list_, version
 
 print(version())
 init()

@@ -1,15 +1,15 @@
 # Build artifacts
 __pycache__/
-/build/
-/dist/
-/npm/dist/
-/npm/git-third-party/dist/
+/python/build/
+/python/dist/
+/node/dist/
+/node/git-third-party/dist/
 node_modules/
 *.egg-info/
 
 # Shared library staged into the package by hatch_build.py during a wheel
 # build; never committed.
-/python/third_party/libgitthirdparty.so
-/python/third_party/libgitthirdparty.dylib
-/python/third_party/gitthirdparty.dll
+/python/git-third-party/libgitthirdparty.so
+/python/git-third-party/libgitthirdparty.dylib
+/python/git-third-party/gitthirdparty.dll
 .pytest_cache/

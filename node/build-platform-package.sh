@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build one platform-specific npm package: a static CLI binary plus the
 # c-shared FFI library, both produced by `go build`. Mirrors the
-# per-platform output of hatch_build.py for the Python wheel target.
+# per-platform output of python/hatch_build.py for the Python wheel target.
 #
 # Required env:
 #   GOOS     one of linux | darwin | windows
@@ -11,9 +11,9 @@
 # Optional env:
 #   GTP_NPM_SKIP_SHAREDLIB=1  skip the c-shared lib (CLI-only package).
 #                             Mirrors GIT_THIRD_PARTY_SKIP_SHAREDLIB in
-#                             hatch_build.py for cross-compile dev runs
+#                             python/hatch_build.py for cross-compile dev runs
 #                             without a C cross-toolchain.
-#   OUT_DIR                   override output directory (default: npm/dist).
+#   OUT_DIR                   override output directory (default: node/dist).
 
 set -euo pipefail
 
@@ -22,13 +22,12 @@ set -euo pipefail
 : "${VERSION:?VERSION must be set (e.g. 0.0.1)}"
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-out_dir="${OUT_DIR:-${repo_root}/npm/dist}"
+out_dir="${OUT_DIR:-${repo_root}/node/dist}"
 
 # (GOOS, GOARCH) -> (npm os, npm cpu, suffix). Mirrors _WHEEL_PLATFORMS.
 case "${GOOS}/${GOARCH}" in
   linux/amd64)   npm_os=linux;  npm_cpu=x64;   suffix=linux-x64 ;;
   linux/arm64)   npm_os=linux;  npm_cpu=arm64; suffix=linux-arm64 ;;
-  darwin/amd64)  npm_os=darwin; npm_cpu=x64;   suffix=darwin-x64 ;;
   darwin/arm64)  npm_os=darwin; npm_cpu=arm64; suffix=darwin-arm64 ;;
   windows/amd64) npm_os=win32;  npm_cpu=x64;   suffix=win32-x64 ;;
   *)

@@ -5,8 +5,8 @@ Each wheel build produces two artifacts:
   1. The static CLI binary (CGO_ENABLED=0), shipped as a wheel script so
      `pip install` puts it on PATH (~/.local/bin via pipx, etc.).
   2. The cgo c-shared library (CGO_ENABLED=1), staged inside the Python
-     package so `import third_party` finds it next to _ffi.py and loads
-     it through ctypes.
+     package so `import git_third_party` finds it next to _ffi.py and
+     loads it through ctypes.
 
 Set GIT_THIRD_PARTY_SKIP_SHAREDLIB=1 to skip artifact (2) — useful for
 host-only dev builds without a C cross-toolchain.
@@ -34,7 +34,6 @@ from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 _WHEEL_PLATFORMS = {
     ("linux", "amd64"): "manylinux2014_x86_64",
     ("linux", "arm64"): "manylinux2014_aarch64",
-    ("darwin", "amd64"): "macosx_10_12_x86_64",
     ("darwin", "arm64"): "macosx_11_0_arm64",
     ("windows", "amd64"): "win_amd64",
 }
@@ -54,7 +53,6 @@ class GoBuildHook(BuildHookInterface):
     PLUGIN_NAME = "custom"
 
     def initialize(self, version, build_data):
-        # sdist builds run a different builder; only run for wheel targets.
         if self.target_name != "wheel":
             return
 
@@ -73,6 +71,8 @@ class GoBuildHook(BuildHookInterface):
             bin_name += ".exe"
 
         root = Path(self.root)
+        # Go source lives at the repo root; this pyproject is in python/.
+        go_root = root.parent
         out_dir = root / "build" / f"{goos}-{goarch}"
         out_dir.mkdir(parents=True, exist_ok=True)
         bin_out_path = out_dir / bin_name
@@ -97,7 +97,7 @@ class GoBuildHook(BuildHookInterface):
             ],
             check=True,
             env=cli_env,
-            cwd=root,
+            cwd=go_root,
         )
 
         force_include = {}
@@ -123,15 +123,17 @@ class GoBuildHook(BuildHookInterface):
                 ],
                 check=True,
                 env=lib_env,
-                cwd=root,
+                cwd=go_root,
             )
             # Stage into the package directory so hatchling picks it up
-            # as package data alongside the .py modules.
-            pkg_dir = root / "python" / "third_party"
+            # as package data alongside the .py modules. The on-disk dir
+            # is hyphenated; the sources map in pyproject.toml rewrites
+            # the wheel path to git_third_party/ so Python can import it.
+            pkg_dir = root / "git-third-party"
             pkg_lib_path = pkg_dir / lib_name
             shutil.copyfile(lib_out_path, pkg_lib_path)
             self._staged_lib_path = pkg_lib_path
-            force_include[str(pkg_lib_path)] = f"third_party/{lib_name}"
+            force_include[str(pkg_lib_path)] = f"git_third_party/{lib_name}"
 
         if force_include:
             existing = build_data.get("force_include") or {}

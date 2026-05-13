@@ -5,7 +5,7 @@ module. The CLI binary (`git-third-party`) is unchanged and remains
 the canonical user-facing tool.
 
 Example:
-    from third_party import init, add, list_
+    from git_third_party import init, add, list_
     init(".")
     add(".", dir="vendor/foo", url="https://github.com/x/y", follow="main")
     for e in list_("."):

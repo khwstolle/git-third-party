@@ -43,7 +43,6 @@
   "optionalDependencies": {
     "git-third-party-linux-x64": "1.0.0",
     "git-third-party-linux-arm64": "1.0.0",
-    "git-third-party-darwin-x64": "1.0.0",
     "git-third-party-darwin-arm64": "1.0.0",
     "git-third-party-win32-x64": "1.0.0"
   },

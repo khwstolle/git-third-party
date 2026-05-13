@@ -24,7 +24,7 @@ def _libname() -> str:
         return "libgitthirdparty.dylib"
     if sys.platform == "win32":
         return "gitthirdparty.dll"
-    raise RuntimeError(f"third_party: unsupported platform: {sys.platform}")
+    raise RuntimeError(f"git_third_party: unsupported platform: {sys.platform}")
 
 
 def _find_lib() -> Path:
@@ -39,7 +39,7 @@ def _find_lib() -> Path:
     if p.exists():
         return p
     raise FileNotFoundError(
-        f"third_party: shared library {_libname()!r} not found next to {here}; "
+        f"git_third_party: shared library {_libname()!r} not found next to {here}; "
         "set GIT_THIRD_PARTY_LIB to point at a development build"
     )
 

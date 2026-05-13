@@ -1,4 +1,4 @@
-"""Exception hierarchy for the third_party bindings.
+"""Exception hierarchy for the git_third_party bindings.
 
 Maps the Go side's stable exit codes (errors.go) to Python exception
 classes so callers can `except ConfigError:` instead of inspecting an

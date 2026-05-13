@@ -21,26 +21,17 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/khwstolle/git-third-party"
+Homepage = "https://gh.khws.io/git-third-party"
 Repository = "https://github.com/khwstolle/git-third-party"
 
 [tool.hatch.build.targets.wheel]
-packages = ["python/third_party"]
+# Source dir uses the hyphenated PyPI/npm package name for symmetry with node/.
+# Hatchling rewrites the path to git_third_party/ in the wheel so Python can
+# import it; the on-disk dir name is never seen by callers.
+only-include = ["git-third-party"]
+
+[tool.hatch.build.targets.wheel.sources]
+"git-third-party" = "git_third_party"
 
 [tool.hatch.build.targets.wheel.hooks.custom]
 path = "hatch_build.py"
-
-[tool.hatch.build.targets.sdist]
-include = [
-  "/cmd",
-  "/internal",
-  "/go.mod",
-  "/go.sum",
-  "/completion",
-  "/npm",
-  "/python",
-  "/README.md",
-  "/LICENSE",
-  "/pyproject.toml",
-  "/hatch_build.py",
-]
