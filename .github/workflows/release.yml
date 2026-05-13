@@ -134,6 +134,8 @@ jobs:
         run: ls -la dist/
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
 
   build-npm-platform:
     name: npm ${{ matrix.target.suffix }}
@@ -216,6 +218,10 @@ jobs:
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
+      # npm 11.5+ is required for the OIDC trusted-publishing exchange;
+      # Node 20 ships npm 10.x.
+      - name: Upgrade npm
+        run: npm install -g npm@latest
       - name: Download platform artifacts
         uses: actions/download-artifact@v4
         with:
