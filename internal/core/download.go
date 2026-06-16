@@ -257,6 +257,9 @@ func (a *App) downloadTheThing(ctx context.Context, gopt GlobalOptions, items []
 		}
 	}
 	if !item.LFS {
+		if err := a.stripVendoredLFSAttributes(ctx, gopt, item.Dir); err != nil {
+			return res, err
+		}
 		if err := a.ensureLFSExclusion(ctx, gopt, item.Dir); err != nil {
 			return res, err
 		}
@@ -294,7 +297,7 @@ const (
 	gitattributesFile    = ".gitattributes"
 	lfsExcludeBegin      = "# git-third-party: begin lfs-exclude"
 	lfsExcludeEnd        = "# git-third-party: end lfs-exclude"
-	lfsExcludeLineFormat = "%s/** -filter=lfs -diff=lfs -merge=lfs -text"
+	lfsExcludeLineFormat = "%s/** -filter -diff -merge -text"
 )
 
 // ensureLFSExclusion adds dir to the git-third-party-managed lfs-exclude
@@ -427,4 +430,50 @@ func setLFSExcludeEntry(content, entry string, add bool) (string, error) {
 		b.WriteString(strings.TrimLeft(after, "\n"))
 	}
 	return b.String(), nil
+}
+
+// stripVendoredLFSAttributes removes LFS filter lines from any .gitattributes
+// files within the vendored directory. Vendored repos (e.g. from HuggingFace)
+// often include .gitattributes that re-enable LFS, which overrides the
+// root-level exclusion added by ensureLFSExclusion.
+func (a *App) stripVendoredLFSAttributes(ctx context.Context, gopt GlobalOptions, dir string) error {
+	root, err := a.getRepoRoot(ctx, gopt)
+	if err != nil {
+		return err
+	}
+	absDir := filepath.Join(root, dir)
+	return filepath.WalkDir(absDir, func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil || d.IsDir() || d.Name() != gitattributesFile {
+			return walkErr
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		stripped := stripLFSLines(string(data))
+		if stripped == string(data) {
+			return nil
+		}
+		rel := relPath(path)
+		if strings.TrimSpace(stripped) == "" {
+			if _, err := a.git(ctx, gopt, []string{"update-index", "--remove", rel}, modeMutating, gitOpts{}); err != nil {
+				return err
+			}
+			return os.Remove(path)
+		}
+		return a.writeAndStage(ctx, gopt, path, []byte(stripped))
+	})
+}
+
+// stripLFSLines removes gitattributes lines that set filter=lfs, leaving
+// comment lines and all other rules intact.
+func stripLFSLines(content string) string {
+	lines := strings.Split(content, "\n")
+	kept := lines[:0]
+	for _, l := range lines {
+		if strings.HasPrefix(strings.TrimSpace(l), "#") || !strings.Contains(l, "filter=lfs") {
+			kept = append(kept, l)
+		}
+	}
+	return strings.Join(kept, "\n")
 }
