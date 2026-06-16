@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"runtime/pprof"
 	"strings"
 
@@ -90,6 +91,7 @@ func newRootCmd(a *App) *cobra.Command {
 	root.AddCommand(
 		newInitCmd(a, gopt),
 		newAddCmd(a, gopt),
+		newCloneCmd(a, gopt),
 		newSetCmd(a, gopt),
 		newUnsetCmd(a, gopt),
 		newUpdateCmd(a, gopt, false),
@@ -145,6 +147,48 @@ func newAddCmd(a *App, gopt *GlobalOptions) *cobra.Command {
 				lfsOpt = &lfs
 			}
 			return a.add(cmd.Context(), *gopt, args[1], follow, pin, args[0], subdir, include, exclude, lfsOpt, allowDirExists)
+		},
+	}
+	f := cmd.Flags()
+	f.StringVar(&subdir, "subdir", "", "subdirectory of the upstream to vendor")
+	f.StringVar(&follow, "follow", "", "branch to follow")
+	f.StringVar(&pin, "pin", "", "tag name or commit SHA to pin to")
+	f.StringSliceVar(&include, "include", nil, "include pattern (gitignore-style; repeatable)")
+	f.StringSliceVar(&exclude, "exclude", nil, "exclude pattern (gitignore-style; repeatable)")
+	f.BoolVar(&lfs, "lfs", false, "download LFS objects during checkout (default: vendor pointer files only)")
+	f.BoolVarP(&allowDirExists, "allow-dir-exists", "f", false, "allow target dir to already exist")
+	return cmd
+}
+
+// newCloneCmd is add with URL and DIR swapped to match `git clone URL DIR`.
+func newCloneCmd(a *App, gopt *GlobalOptions) *cobra.Command {
+	var subdir, follow, pin string
+	var include, exclude []string
+	var allowDirExists, lfs bool
+
+	cmd := &cobra.Command{
+		Use:   "clone URL [DIR]",
+		Short: "Like add, but takes URL before DIR (matches git clone argument order)",
+		Args:  cobra.RangeArgs(1, 2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if follow != "" && pin != "" {
+				return userErrorf("--follow and --pin are mutually exclusive")
+			}
+			url := args[0]
+			var dir string
+			if len(args) == 2 {
+				dir = args[1]
+			} else {
+				dir = strings.TrimSuffix(path.Base(strings.TrimSuffix(url, "/")), ".git")
+				if dir == "" || dir == "." {
+					return userErrorf("cannot derive DIR from URL %q; pass it explicitly", url)
+				}
+			}
+			var lfsOpt *bool
+			if cmd.Flags().Changed("lfs") {
+				lfsOpt = &lfs
+			}
+			return a.add(cmd.Context(), *gopt, url, follow, pin, dir, subdir, include, exclude, lfsOpt, allowDirExists)
 		},
 	}
 	f := cmd.Flags()

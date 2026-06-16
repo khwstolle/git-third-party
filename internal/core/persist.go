@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -362,7 +363,10 @@ func writeTOMLStringList(b *strings.Builder, key string, vals []string) {
 }
 
 func writeTOMLBool(b *strings.Builder, key string, val bool) {
-	fmt.Fprintf(b, "%s = %v\n", key, val)
+	b.WriteString(key)
+	b.WriteString(" = ")
+	b.WriteString(strconv.FormatBool(val))
+	b.WriteByte('\n')
 }
 
 func writeTOMLBasicString(b *strings.Builder, s string) {
