@@ -13,7 +13,7 @@ import (
 func addOne(t *testing.T, host, upstream, dir string) {
 	t.Helper()
 	withRepo(t, host, func(ctx context.Context, a *App) {
-		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", dir, "", nil, nil, false); err != nil {
+		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", dir, "", nil, nil, nil, false); err != nil {
 			t.Fatalf("add: %v", err)
 		}
 	})
@@ -27,7 +27,7 @@ func TestDoSetChangesURL(t *testing.T) {
 	addOne(t, host, upstream1, "vendor/x")
 
 	withRepo(t, host, func(ctx context.Context, a *App) {
-		if err := a.set(ctx, GlobalOptions{}, upstream2, "main", "", "vendor/x", nil, nil, nil); err != nil {
+		if err := a.set(ctx, GlobalOptions{}, upstream2, "main", "", "vendor/x", nil, nil, nil, nil); err != nil {
 			t.Fatalf("set: %v", err)
 		}
 	})
@@ -53,7 +53,7 @@ func TestDoUnsetClearsInclude(t *testing.T) {
 	host := makeRepo(t)
 	withRepo(t, host, func(ctx context.Context, a *App) {
 		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/x", "",
-			[]string{"*.c"}, nil, false); err != nil {
+			[]string{"*.c"}, nil, nil, false); err != nil {
 			t.Fatalf("add: %v", err)
 		}
 	})
@@ -87,7 +87,7 @@ func TestDoSetSwitchBranchToTag(t *testing.T) {
 	addOne(t, host, upstream, "vendor/x")
 
 	withRepo(t, host, func(ctx context.Context, a *App) {
-		if err := a.set(ctx, GlobalOptions{}, "", "", "v1.0.0", "vendor/x", nil, nil, nil); err != nil {
+		if err := a.set(ctx, GlobalOptions{}, "", "", "v1.0.0", "vendor/x", nil, nil, nil, nil); err != nil {
 			t.Fatalf("set: %v", err)
 		}
 	})

@@ -12,7 +12,7 @@ func TestFeaturesConfigOrdering(t *testing.T) {
 	upstream, _ := makeUpstream(t, map[string]string{"a": "a"})
 	host := makeRepo(t)
 	withRepo(t, host, func(ctx context.Context, a *App) {
-		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/a", "", nil, nil, false); err != nil {
+		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/a", "", nil, nil, nil, false); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -27,7 +27,7 @@ func TestFeaturesConfigOrdering(t *testing.T) {
 
 	// Add second entry.
 	withRepo(t, host, func(ctx context.Context, a *App) {
-		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/b", "", nil, nil, false); err != nil {
+		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/b", "", nil, nil, nil, false); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -49,7 +49,7 @@ func TestFeaturesSubdirVendoring(t *testing.T) {
 	})
 	host := makeRepo(t)
 	withRepo(t, host, func(ctx context.Context, a *App) {
-		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/foo", "src", nil, nil, false); err != nil {
+		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/foo", "src", nil, nil, nil, false); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -65,7 +65,7 @@ func TestFeaturesDryRun(t *testing.T) {
 	upstream, _ := makeUpstream(t, map[string]string{"a": "a"})
 	host := makeRepo(t)
 	withRepo(t, host, func(ctx context.Context, a *App) {
-		if err := a.add(ctx, GlobalOptions{DryRun: true}, upstream, "main", "", "vendor/x", "", nil, nil, false); err != nil {
+		if err := a.add(ctx, GlobalOptions{DryRun: true}, upstream, "main", "", "vendor/x", "", nil, nil, nil, false); err != nil {
 			t.Fatal(err)
 		}
 	})

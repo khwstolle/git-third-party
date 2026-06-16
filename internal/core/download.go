@@ -235,7 +235,12 @@ func (a *App) downloadTheThing(ctx context.Context, gopt GlobalOptions, items []
 	}
 	actualDir := filepath.Join(root, item.Dir)
 	_ = os.MkdirAll(actualDir, 0755)
-	if _, err := a.git(ctx, gopt, []string{"--work-tree", actualDir, "restore", "--source", vendoredTree, "."}, modeMutating, gitOpts{}); err != nil {
+	restoreArgs := []string{"--work-tree", actualDir, "restore", "--source", vendoredTree, "."}
+	if !item.LFS {
+		// Vendor LFS pointer files rather than downloading the large objects.
+		restoreArgs = append([]string{"-c", "filter.lfs.required=false", "-c", "filter.lfs.smudge=cat", "-c", "filter.lfs.process="}, restoreArgs...)
+	}
+	if _, err := a.git(ctx, gopt, restoreArgs, modeMutating, gitOpts{}); err != nil {
 		return res, err
 	}
 	for {

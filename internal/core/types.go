@@ -13,6 +13,7 @@ type ConfigItem struct {
 	Subdir  string
 	Include []string
 	Exclude []string
+	LFS     bool
 
 	// Resolution — written to third-party.lock.
 	Commit    string

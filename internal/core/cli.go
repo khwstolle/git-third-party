@@ -130,7 +130,7 @@ func newInfoCmd(a *App, gopt *GlobalOptions) *cobra.Command {
 func newAddCmd(a *App, gopt *GlobalOptions) *cobra.Command {
 	var subdir, follow, pin string
 	var include, exclude []string
-	var allowDirExists bool
+	var allowDirExists, lfs bool
 
 	cmd := &cobra.Command{
 		Use:   "add DIR URL",
@@ -140,7 +140,11 @@ func newAddCmd(a *App, gopt *GlobalOptions) *cobra.Command {
 			if follow != "" && pin != "" {
 				return userErrorf("--follow and --pin are mutually exclusive")
 			}
-			return a.add(cmd.Context(), *gopt, args[1], follow, pin, args[0], subdir, include, exclude, allowDirExists)
+			var lfsOpt *bool
+			if cmd.Flags().Changed("lfs") {
+				lfsOpt = &lfs
+			}
+			return a.add(cmd.Context(), *gopt, args[1], follow, pin, args[0], subdir, include, exclude, lfsOpt, allowDirExists)
 		},
 	}
 	f := cmd.Flags()
@@ -149,6 +153,7 @@ func newAddCmd(a *App, gopt *GlobalOptions) *cobra.Command {
 	f.StringVar(&pin, "pin", "", "tag name or commit SHA to pin to")
 	f.StringSliceVar(&include, "include", nil, "include pattern (gitignore-style; repeatable)")
 	f.StringSliceVar(&exclude, "exclude", nil, "exclude pattern (gitignore-style; repeatable)")
+	f.BoolVar(&lfs, "lfs", false, "download LFS objects during checkout (default: vendor pointer files only)")
 	f.BoolVarP(&allowDirExists, "allow-dir-exists", "f", false, "allow target dir to already exist")
 	return cmd
 }
@@ -157,6 +162,7 @@ func newSetCmd(a *App, gopt *GlobalOptions) *cobra.Command {
 	var url, follow, pin string
 	var subdirFlag string
 	var include, exclude []string
+	var lfs bool
 
 	cmd := &cobra.Command{
 		Use:     "set DIR",
@@ -184,7 +190,11 @@ To clear a field (subdir, include, exclude), use ` + "`unset`" + ` instead.`,
 				v := exclude
 				excOpt = &v
 			}
-			return a.set(cmd.Context(), *gopt, url, follow, pin, args[0], subdirOpt, incOpt, excOpt)
+			var lfsOpt *bool
+			if cmd.Flags().Changed("lfs") {
+				lfsOpt = &lfs
+			}
+			return a.set(cmd.Context(), *gopt, url, follow, pin, args[0], subdirOpt, incOpt, excOpt, lfsOpt)
 		},
 	}
 	f := cmd.Flags()
@@ -194,6 +204,7 @@ To clear a field (subdir, include, exclude), use ` + "`unset`" + ` instead.`,
 	f.StringVar(&pin, "pin", "", "switch to pin to this tag or commit")
 	f.StringSliceVar(&include, "include", nil, "replace include patterns")
 	f.StringSliceVar(&exclude, "exclude", nil, "replace exclude patterns")
+	f.BoolVar(&lfs, "lfs", false, "download LFS objects during checkout (default: vendor pointer files only)")
 	return cmd
 }
 

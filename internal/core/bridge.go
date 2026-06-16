@@ -146,6 +146,7 @@ type addArgs struct {
 	Subdir         string   `json:"subdir"`
 	Include        []string `json:"include"`
 	Exclude        []string `json:"exclude"`
+	LFS            *bool    `json:"lfs"`
 	AllowDirExists bool     `json:"allow_dir_exists"`
 }
 
@@ -154,7 +155,7 @@ func DispatchAdd(ctx context.Context, a *App, gopt GlobalOptions, raw json.RawMe
 	if err := unmarshalArgs(raw, &args); err != nil {
 		return err
 	}
-	return a.add(ctx, gopt, args.URL, args.Follow, args.Pin, args.Dir, args.Subdir, args.Include, args.Exclude, args.AllowDirExists)
+	return a.add(ctx, gopt, args.URL, args.Follow, args.Pin, args.Dir, args.Subdir, args.Include, args.Exclude, args.LFS, args.AllowDirExists)
 }
 
 type setArgs struct {
@@ -165,6 +166,7 @@ type setArgs struct {
 	Subdir  *string   `json:"subdir"`
 	Include *[]string `json:"include"`
 	Exclude *[]string `json:"exclude"`
+	LFS     *bool     `json:"lfs"`
 }
 
 func DispatchSet(ctx context.Context, a *App, gopt GlobalOptions, raw json.RawMessage) error {
@@ -172,7 +174,7 @@ func DispatchSet(ctx context.Context, a *App, gopt GlobalOptions, raw json.RawMe
 	if err := unmarshalArgs(raw, &args); err != nil {
 		return err
 	}
-	return a.set(ctx, gopt, args.URL, args.Follow, args.Pin, args.Dir, args.Subdir, args.Include, args.Exclude)
+	return a.set(ctx, gopt, args.URL, args.Follow, args.Pin, args.Dir, args.Subdir, args.Include, args.Exclude, args.LFS)
 }
 
 type unsetArgs struct {

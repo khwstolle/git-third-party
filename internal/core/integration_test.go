@@ -116,7 +116,7 @@ func TestIntegrationAddListUpdateRemove(t *testing.T) {
 	host := makeRepo(t)
 
 	stdout, stderr := withRepo(t, host, func(ctx context.Context, a *App) {
-		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/foo", "", nil, nil, false); err != nil {
+		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/foo", "", nil, nil, nil, false); err != nil {
 			t.Errorf("add: %v", err)
 		}
 	})

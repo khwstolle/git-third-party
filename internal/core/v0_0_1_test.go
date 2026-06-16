@@ -14,7 +14,7 @@ func TestV0_0_1_Compatibility(t *testing.T) {
 	upstream, _ := makeUpstream(t, map[string]string{"a": "a"})
 
 	withRepo(t, host, func(ctx context.Context, a *App) {
-		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/old", "", nil, nil, true); err != nil {
+		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/old", "", nil, nil, nil, true); err != nil {
 			t.Fatal(err)
 		}
 	})

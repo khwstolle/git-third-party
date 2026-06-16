@@ -11,7 +11,7 @@ import (
 	"syscall"
 )
 
-func (a *App) add(ctx context.Context, gopt GlobalOptions, url, follow, pin, dir, subdir string, include, exclude []string, allowDirExists bool) error {
+func (a *App) add(ctx context.Context, gopt GlobalOptions, url, follow, pin, dir, subdir string, include, exclude []string, lfsOpt *bool, allowDirExists bool) error {
 	item := &ConfigItem{}
 	d, err := a.actualDirToPathInRepo(ctx, gopt, dir, "--dir")
 	if err != nil {
@@ -77,6 +77,9 @@ func (a *App) add(ctx context.Context, gopt GlobalOptions, url, follow, pin, dir
 	if len(exclude) > 0 {
 		item.Exclude = exclude
 	}
+	if lfsOpt != nil {
+		item.LFS = *lfsOpt
+	}
 	items := append([]*ConfigItem(nil), existing...)
 	items = append(items, item)
 	res, err := a.downloadTheThing(ctx, gopt, items, len(items)-1)
@@ -100,7 +103,7 @@ func (a *App) emitSingleResult(ctx context.Context, gopt GlobalOptions, r entryR
 }
 
 // set: subdirOpt/includeOpt/excludeOpt are nil when not specified, non-nil to replace.
-func (a *App) set(ctx context.Context, gopt GlobalOptions, url, follow, pin, dir string, subdirOpt *string, includeOpt, excludeOpt *[]string) error {
+func (a *App) set(ctx context.Context, gopt GlobalOptions, url, follow, pin, dir string, subdirOpt *string, includeOpt, excludeOpt *[]string, lfsOpt *bool) error {
 	items, item, idx, err := a.findConfigItemByDir(ctx, gopt, dir)
 	if err != nil {
 		return err
@@ -156,6 +159,9 @@ func (a *App) set(ctx context.Context, gopt GlobalOptions, url, follow, pin, dir
 	}
 	if excludeOpt != nil {
 		item.Exclude = *excludeOpt
+	}
+	if lfsOpt != nil {
+		item.LFS = *lfsOpt
 	}
 	if needsFetch {
 		item.Commit = ""

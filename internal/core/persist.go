@@ -39,6 +39,7 @@ type configEntryTOML struct {
 	Subdir  string   `toml:"subdir,omitempty"`
 	Include []string `toml:"include,omitempty"`
 	Exclude []string `toml:"exclude,omitempty"`
+	LFS     bool     `toml:"lfs,omitempty"`
 }
 
 type lockFileTOML struct {
@@ -130,6 +131,7 @@ func (a *App) readNewConfig(ctx context.Context, gopt GlobalOptions, cfgData []b
 			Subdir:  e.Subdir,
 			Include: append([]string(nil), e.Include...),
 			Exclude: append([]string(nil), e.Exclude...),
+			LFS:     e.LFS,
 		}
 		if err := validateDir(item.Dir, "dir"); err != nil {
 			return nil, decoratedConfigErr(cfgPath, hint, err)
@@ -306,6 +308,9 @@ func emitConfigTOML(items []*ConfigItem) []byte {
 		if len(it.Exclude) > 0 {
 			writeTOMLStringList(&b, "exclude", it.Exclude)
 		}
+		if it.LFS {
+			writeTOMLBool(&b, "lfs", it.LFS)
+		}
 	}
 	return []byte(b.String())
 }
@@ -354,6 +359,10 @@ func writeTOMLStringList(b *strings.Builder, key string, vals []string) {
 		writeTOMLBasicString(b, v)
 	}
 	b.WriteString("]\n")
+}
+
+func writeTOMLBool(b *strings.Builder, key string, val bool) {
+	fmt.Fprintf(b, "%s = %v\n", key, val)
 }
 
 func writeTOMLBasicString(b *strings.Builder, s string) {

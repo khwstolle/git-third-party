@@ -15,7 +15,7 @@ func TestDryRunInvariance(t *testing.T) {
 	upstream, _ := makeUpstream(t, map[string]string{"a.txt": "v1\n"})
 	host := makeRepo(t)
 	withRepo(t, host, func(ctx context.Context, a *App) {
-		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/x", "", nil, nil, false); err != nil {
+		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/x", "", nil, nil, nil, false); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -66,13 +66,13 @@ func TestCleanupRefsScoping(t *testing.T) {
 	host := makeRepo(t)
 
 	withRepo(t, host, func(ctx context.Context, a *App) {
-		if err := a.add(ctx, GlobalOptions{}, upstreamA, "main", "", "vendor/a", "", nil, nil, false); err != nil {
+		if err := a.add(ctx, GlobalOptions{}, upstreamA, "main", "", "vendor/a", "", nil, nil, nil, false); err != nil {
 			t.Fatal(err)
 		}
 	})
 	runIn(t, host, "git", "commit", "-q", "-m", "vendor a")
 	withRepo(t, host, func(ctx context.Context, a *App) {
-		if err := a.add(ctx, GlobalOptions{}, upstreamB, "main", "", "vendor/b", "", nil, nil, false); err != nil {
+		if err := a.add(ctx, GlobalOptions{}, upstreamB, "main", "", "vendor/b", "", nil, nil, nil, false); err != nil {
 			t.Fatal(err)
 		}
 	})

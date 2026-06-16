@@ -294,7 +294,9 @@ func fnv64Hash(s string) uint64 {
 
 func (a *App) gitFetchToCache(ctx context.Context, gopt GlobalOptions, url, ref string, sectionIndex int) error {
 	localRef := fmt.Sprintf("refs/third_party/%d/ref-%x", sectionIndex, fnv64Hash(url+"\x00"+ref))
+	// noop: some git servers drop the 'acknowledgments' section when haves are sent.
 	_, err := a.git(ctx, gopt, []string{
+		"-c", "fetch.negotiationAlgorithm=noop",
 		"fetch", "--no-tags", "--force", "--depth", "1",
 		url, fmt.Sprintf("%s:%s", ref, localRef),
 	}, modeInheritStdout, gitOpts{})

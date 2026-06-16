@@ -125,7 +125,7 @@ func TestUnsetIncludeClearsIt(t *testing.T) {
 	host := makeRepo(t)
 	withRepo(t, host, func(ctx context.Context, a *App) {
 		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/x", "",
-			[]string{"*.c"}, nil, false); err != nil {
+			[]string{"*.c"}, nil, nil, false); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -147,7 +147,7 @@ func TestUnsetSubdirClearsIt(t *testing.T) {
 	upstream, _ := makeUpstream(t, map[string]string{"src/a.txt": "x\n"})
 	host := makeRepo(t)
 	withRepo(t, host, func(ctx context.Context, a *App) {
-		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/x", "src", nil, nil, false); err != nil {
+		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/x", "src", nil, nil, nil, false); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -172,7 +172,7 @@ func TestUnsetMultipleFields(t *testing.T) {
 	host := makeRepo(t)
 	withRepo(t, host, func(ctx context.Context, a *App) {
 		if err := a.add(ctx, GlobalOptions{}, upstream, "main", "", "vendor/x", "src",
-			[]string{"*.c"}, []string{"tests/"}, false); err != nil {
+			[]string{"*.c"}, []string{"tests/"}, nil, false); err != nil {
 			t.Fatal(err)
 		}
 	})
