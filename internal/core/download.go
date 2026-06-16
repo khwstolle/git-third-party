@@ -176,7 +176,6 @@ func (a *App) downloadTheThing(ctx context.Context, gopt GlobalOptions, items []
 	if err := a.writeConfigAndLock(ctx, gopt, items); err != nil {
 		return res, err
 	}
-
 	currentTree, err := a.git(ctx, gopt, []string{"write-tree"}, modeSingleLine, gitOpts{})
 	if err != nil {
 		return res, err
@@ -257,6 +256,15 @@ func (a *App) downloadTheThing(ctx context.Context, gopt GlobalOptions, items []
 			break
 		}
 	}
+	if !item.LFS {
+		if err := a.ensureLFSExclusion(ctx, gopt, item.Dir); err != nil {
+			return res, err
+		}
+	} else {
+		if err := a.removeLFSExclusion(ctx, gopt, item.Dir); err != nil {
+			return res, err
+		}
+	}
 	statusAfter, err := a.gitStatusFor(ctx, gopt, item.Dir)
 	if err != nil {
 		return res, err
@@ -280,4 +288,143 @@ func (a *App) downloadTheThing(ctx context.Context, gopt GlobalOptions, items []
 	}
 	stages.apply = time.Since(t0)
 	return res, nil
+}
+
+const (
+	gitattributesFile    = ".gitattributes"
+	lfsExcludeBegin      = "# git-third-party: begin lfs-exclude"
+	lfsExcludeEnd        = "# git-third-party: end lfs-exclude"
+	lfsExcludeLineFormat = "%s/** -filter=lfs -diff=lfs -merge=lfs -text"
+)
+
+// ensureLFSExclusion adds dir to the git-third-party-managed lfs-exclude
+// section of .gitattributes and stages the file. This ensures the exclusion
+// is in the same commit as the vendored content, so server-side LFS hooks
+// don't mistake pointer files for tracked LFS objects.
+func (a *App) ensureLFSExclusion(ctx context.Context, gopt GlobalOptions, dir string) error {
+	root, err := a.getRepoRoot(ctx, gopt)
+	if err != nil {
+		return err
+	}
+	gaPath := filepath.Join(root, gitattributesFile)
+	entry := fmt.Sprintf(lfsExcludeLineFormat, dir)
+
+	data, err := os.ReadFile(gaPath)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	content := string(data)
+	newContent, err := setLFSExcludeEntry(content, entry, true)
+	if err != nil {
+		return err
+	}
+	if newContent == content {
+		return nil
+	}
+	return a.writeAndStage(ctx, gopt, gaPath, []byte(newContent))
+}
+
+// removeLFSExclusion removes dir from the git-third-party lfs-exclude section.
+func (a *App) removeLFSExclusion(ctx context.Context, gopt GlobalOptions, dir string) error {
+	root, err := a.getRepoRoot(ctx, gopt)
+	if err != nil {
+		return err
+	}
+	gaPath := filepath.Join(root, gitattributesFile)
+	entry := fmt.Sprintf(lfsExcludeLineFormat, dir)
+
+	data, err := os.ReadFile(gaPath)
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	content := string(data)
+	newContent, err := setLFSExcludeEntry(content, entry, false)
+	if err != nil {
+		return err
+	}
+	if newContent == content {
+		return nil
+	}
+	if newContent == "" {
+		if _, err := a.git(ctx, gopt, []string{"update-index", "--remove", relPath(gaPath)}, modeMutating, gitOpts{}); err != nil {
+			return err
+		}
+		if err := os.Remove(gaPath); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+		return nil
+	}
+	return a.writeAndStage(ctx, gopt, gaPath, []byte(newContent))
+}
+
+// setLFSExcludeEntry adds or removes entry from the managed section,
+// returning the updated file content. Returns the original string if unchanged.
+// Returns an error if the begin marker is present without a matching end marker.
+func setLFSExcludeEntry(content, entry string, add bool) (string, error) {
+	// Locate the managed section.
+	beginIdx := strings.Index(content, lfsExcludeBegin)
+	endIdx := strings.Index(content, lfsExcludeEnd)
+
+	if beginIdx >= 0 && (endIdx < 0 || endIdx < beginIdx) {
+		return content, fmt.Errorf(
+			".gitattributes: %q found without matching %q — the managed section may be corrupt; fix or delete it and re-run",
+			lfsExcludeBegin, lfsExcludeEnd)
+	}
+
+	var before, section, after string
+	if beginIdx >= 0 && endIdx > beginIdx {
+		before = content[:beginIdx]
+		section = content[beginIdx+len(lfsExcludeBegin) : endIdx]
+		after = content[endIdx+len(lfsExcludeEnd):]
+	} else {
+		before = content
+	}
+
+	lines := strings.Split(strings.TrimSpace(section), "\n")
+	var kept []string
+	found := false
+	for _, l := range lines {
+		l = strings.TrimSpace(l)
+		if l == "" {
+			continue
+		}
+		if l == entry {
+			found = true
+			if add {
+				kept = append(kept, l)
+			}
+		} else {
+			kept = append(kept, l)
+		}
+	}
+	if add && !found {
+		kept = append(kept, entry)
+	}
+
+	if len(kept) == 0 && beginIdx < 0 {
+		return content, nil // nothing to remove, no section existed
+	}
+
+	var b strings.Builder
+	b.WriteString(strings.TrimRight(before, "\n"))
+	if len(kept) > 0 {
+		if b.Len() > 0 {
+			b.WriteByte('\n')
+		}
+		b.WriteString(lfsExcludeBegin)
+		b.WriteByte('\n')
+		for _, l := range kept {
+			b.WriteString(l)
+			b.WriteByte('\n')
+		}
+		b.WriteString(lfsExcludeEnd)
+		b.WriteByte('\n')
+	}
+	if after != "" {
+		b.WriteString(strings.TrimLeft(after, "\n"))
+	}
+	return b.String(), nil
 }

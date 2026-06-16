@@ -386,6 +386,11 @@ func (a *App) remove(ctx context.Context, gopt GlobalOptions, actualDir string) 
 	if _, err := a.git(ctx, gopt, []string{"rm", "-r", "-q", "--force", "--", actualDir}, modeMutating, gitOpts{}); err != nil {
 		return err
 	}
+	if !removed.LFS && !gopt.DryRun {
+		if err := a.removeLFSExclusion(ctx, gopt, removed.Dir); err != nil {
+			return fmt.Errorf("%s was removed from the index but .gitattributes could not be updated: %w\nFix .gitattributes manually before committing", removed.Dir, err)
+		}
+	}
 	res.Action = "removed"
 	if !gopt.JSONOut {
 		_, _ = fmt.Fprintln(a.Stdout, "Changes staged to be committed:")
@@ -404,6 +409,7 @@ func (a *App) rename(ctx context.Context, gopt GlobalOptions, actualDir, actualN
 	if err != nil {
 		return err
 	}
+	oldDir := item.Dir
 	canon, err := a.actualDirToPathInRepo(ctx, gopt, actualNewDir, "--new-dir")
 	if err != nil {
 		return err
@@ -453,6 +459,14 @@ func (a *App) rename(ctx context.Context, gopt GlobalOptions, actualDir, actualN
 	_ = os.MkdirAll(filepath.Dir(cleanNew), 0755)
 	if _, err := a.git(ctx, gopt, []string{"mv", filepath.Clean(actualDir), cleanNew}, modeMutating, gitOpts{}); err != nil {
 		return err
+	}
+	if !item.LFS {
+		if err := a.removeLFSExclusion(ctx, gopt, oldDir); err != nil {
+			return err
+		}
+		if err := a.ensureLFSExclusion(ctx, gopt, item.Dir); err != nil {
+			return err
+		}
 	}
 	res.Action = "renamed"
 	if !gopt.JSONOut {
